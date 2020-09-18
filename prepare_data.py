@@ -28,7 +28,6 @@ class generatorData:
     def gen_Data(self, batch_size=8):
         x = np.zeros((batch_size, self.height, self.width, 3), dtype= np.uint8)
         y = [np.zeros((batch_size, self.classNum), dtype=np.uint8) for i in range(self.word)]
-        print(np.shape(y))
         # ImageCaptcha instance
         generator = ImageCaptcha(width=self.width, height=self.height)
         while True:
@@ -43,13 +42,14 @@ class generatorData:
                 for data in y:
                     w = np.argmax(data[single, :]) + 1
                     data_list.append(w)
-            yield x, data_list ## x == input images, data_list=list of label 
+            return x, data_list ## x is input images, data_list is list of label.
 
 
 gendata = generatorData()
-loader = gendata.gen_Data()
+train_datas, train_labels = gendata.gen_Data()
+test_datas, test_labels = gendata.gen_Data()
 
-print(next(loader)[1])
+
 
 """
 # create 0~9, A~Z
