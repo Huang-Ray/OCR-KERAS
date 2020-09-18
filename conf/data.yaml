@@ -1,0 +1,6 @@
+
+data:
+  Captcha:
+    width: 128
+    height: 64
+    wordnum: 4
