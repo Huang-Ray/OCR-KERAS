@@ -1,0 +1,70 @@
+
+data:
+  Captcha:
+    width: 128
+    height: 64
+    wordnum: 4
+
+model:
+  CNN:
+    L1:
+      filters: 64
+      kernels: 3
+      padding: 'same'
+      activation: 'relu'
+    L2:
+      filters: 64
+      kernels: 3
+      padding: 'same'
+      activation: 'relu'
+    L3:
+      filters: 128
+      kernels: 3
+      padding: 'same'
+      activation: 'relu'
+    L4:
+      filters: 128
+      kernels: 3
+      padding: 'same'
+      activation: 'relu'
+    L5:
+      filters: 256
+      kernels: 3
+      padding: 'same'
+      activation: 'relu'
+    L6:
+      filters: 256
+      kernels: 3
+      padding: 'same'
+      activation: 'relu'
+    L7:
+      filters: 256
+      kernels: 3
+      padding: 'same'
+      activation: 'relu'
+    L8:
+      filters: 512
+      kernels: 3
+      padding: 'same'
+      activation: 'relu'
+    L9:
+      filters: 512
+      kernels: 3
+      padding: 'same'
+      activation: 'relu'
+    L10:
+      filters: 512
+      kernels: 3
+      padding: 'same'
+      activation: 'relu'
+    L11:
+      filters: 512
+      kernels: 3
+      padding: 'same'
+      activation: 'relu'
+    L12:
+      filters: 512
+      kernels: 3
+      padding: 'same'
+      activation: 'relu'
+

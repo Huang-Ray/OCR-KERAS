@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from captcha.image import ImageCaptcha # 產生驗證碼的套件
 
-data_config_path = "./conf/data.yaml"
+config_path = "./conf/conf.yaml"
 
 class generatorData:
 
@@ -13,17 +13,15 @@ class generatorData:
         
         self.config = self.get_Config()
         self.characters = string.digits + string.ascii_uppercase
-        self.width = self.config["data"]["Captcha"]["width"]
-        self.height = self.config["data"]["Captcha"]["height"]
-        self.word = self.config["data"]["Captcha"]["wordnum"]
+        self.width = self.config["Captcha"]["width"]
+        self.height = self.config["Captcha"]["height"]
+        self.word = self.config["Captcha"]["wordnum"]
         self.classNum = len(self.characters)
         
-
-
     def get_Config(self):
-        with open(data_config_path, "r") as stream:
-            data = yaml.load(stream, Loader=yaml.FullLoader)
-        return data
+        with open(config_path, "r") as stream:
+            conf = yaml.load(stream, Loader=yaml.FullLoader)
+        return conf["data"]
     
     def gen_Data(self, batch_size=8):
         x = np.zeros((batch_size, self.height, self.width, 3), dtype= np.uint8)
@@ -45,6 +43,7 @@ class generatorData:
             return x, data_list ## x is input images, data_list is list of label.
 
 
+# test
 gendata = generatorData()
 train_datas, train_labels = gendata.gen_Data()
 test_datas, test_labels = gendata.gen_Data()
