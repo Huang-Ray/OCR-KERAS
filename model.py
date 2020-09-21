@@ -29,7 +29,7 @@ class CRNN:
     # create CNN
     def make_CNN(self):
         CNN_CONFIG = self.config["CNN"]
-        print(CNN_CONFIG)
+        #print(CNN_CONFIG)
         
         layers = ["L1", "L2", "M", "L3", "L4", "C", "L5", "L6", "L7", "C", "L8", "L9", "C", "M", "L10", "L11", "L12", "M"]
         
@@ -59,7 +59,7 @@ class CRNN:
     def make_RNN(self):
         input_shapes = K.int_shape(self.CNN_layer.layers[-1].output)
         input_shapes = input_shapes[2:]
-        print("RNN input shapes = ", input_shapes)
+        #print("RNN input shapes = ", input_shapes)
 
         inputs = Input(shape=input_shapes, name="RNN_input")
         inner = Bidirectional(LSTM(units=128, return_sequences=True, dropout=0.3))(inputs)
@@ -85,10 +85,10 @@ class CRNN:
         crnn_model = Model(inputs, outputs)
         return crnn_model
 
+
+""" for test """
 input_shapes = (64, 128, 3)
 model = CRNN(input_shapes).CRNN_model
-
-
 model.summary()
 
 
