@@ -2,8 +2,8 @@
 import yaml
 import numpy as np
 from keras.layers import Conv2D, Input, MaxPooling2D
-from keras.layers import Bidirectional, LSTM
-from keras.layers import BatchNormalization, Bidirectional, Activation, Dropout
+from keras.layers import Bidirectional, LSTM, Dense
+from keras.layers import BatchNormalization, Bidirectional, Activation, Dropout, Reshape
 from keras.models import Model
 from keras.utils import plot_model
 from keras import backend as K 
@@ -12,12 +12,14 @@ config_path = "./conf/conf.yaml"
 
 class CRNN:
 
-    def __init__(self, input_shapes):
+    def __init__(self, input_shapes, class_num=37):
         
         self.config = self.get_Config()
         self.input_shapes = input_shapes
+        self.class_num = class_num
         self.CNN_layer = self.make_CNN()
         self.RNN_layer = self.make_RNN()
+        self.CRNN_model = self.create_model()
 
     def get_Config(self):
         with open(config_path, "r") as stream:
@@ -63,20 +65,30 @@ class CRNN:
         inner = Bidirectional(LSTM(units=128, return_sequences=True, dropout=0.3))(inputs)
         inner = Bidirectional(LSTM(units=64, return_sequences=True, dropout=0.3))(inner)
         inner = Dropout(rate=0.25)(inner)
+        outputs = Dense(units=self.class_num)(inner)
 
-        
-
-        model = Model(inputs, inner)
+        model = Model(inputs, outputs)
         plot_model(model, to_file='RNN.png', show_shapes=True)
         return model
 
-
+    def create_model(self):
+        inputs = Input(shape=self.input_shapes, name='CRNN_input')
+        x = inputs
+        for i in range(1, len(self.CNN_layer.layers)):
+            x = self.CNN_layer.layers[i](x)
+        rnn_input_shapes = np.shape(x)[2:]
+        x = Reshape((rnn_input_shapes[0], rnn_input_shapes[1]))(x)
+        for j in range(1, len(self.RNN_layer.layers)):
+            x = self.RNN_layer.layers[j](x)
+        outputs = x
+        
+        crnn_model = Model(inputs, outputs)
+        return crnn_model
 
 input_shapes = (64, 128, 3)
-model = CRNN(input_shapes).make_CNN()
-model2 = CRNN(input_shapes).make_RNN()
+model = CRNN(input_shapes).CRNN_model
+
 
 model.summary()
-model2.summary()
 
 
