@@ -2,36 +2,23 @@
 import yaml
 import numpy as np
 import tensorflow as tf
-from keras.layers import Conv2D, Input, MaxPooling2D, Layer
+import keras
+from keras import layers
+from keras.layers import Conv2D, Input, MaxPooling2D
 from keras.layers import Bidirectional, LSTM, Dense
-from keras.layers import BatchNormalization, Bidirectional, Activation, Dropout, Reshape
+from keras.layers import BatchNormalization, Bidirectional, Activation, Dropout, Reshape, Lambda
 from keras.models import Model
 from keras.utils import plot_model
 from keras import backend as K 
 
 config_path = "./conf/conf.yaml"
 
-class CTCLayer(Layer):
-    def __init__(self, name=None):
-        super().__init__(name=name)
-        self.loss_fn = K.ctc_batch_cost
-
-    def __call__(self, y_true, y_pred):
-        # Compute the training-time loss value and add it
-        # to the layer using `self.add_loss()
-        batch_len = tf.cast(tf.shape(y_true)[0], dtype='int64')
-        input_length = tf.cast(tf.shape(y_pred)[1], dtype="int64")
-        label_length = tf.cast(tf.shape(y_true)[1], dtype="int64")
-
-        input_length = input_length * tf.ones(shape=(batch_len, 1), dtype="int64")
-        label_length = label_length * tf.ones(shape=(batch_len, 1), dtype="int64")
-
-        loss = self.loss_fn(y_true, y_pred, input_length, label_length)
-        self.add_loss(loss)
-
-        # At test time, just return the computed predictions
-        return y_pred
-
+def ctc_lambda_func(args):
+    y_pred, labels, input_length, label_length = args
+    # the 2 is critical here since the first couple outputs of the RNN
+    # tend to be garbage:
+    y_pred = y_pred[2:, :]
+    return K.ctc_batch_cost(labels, y_pred, input_length, label_length)
 
 class CRNN:
 
@@ -76,7 +63,7 @@ class CRNN:
                 inner = Activation(CNN_CONFIG[layer]["activation"])(inner)
 
         model = Model(inputs, inner)
-        plot_model(model, to_file='CNN.png', show_shapes=True)
+        #plot_model(model, to_file='CNN.png', show_shapes=True)
         return model
 
     def make_RNN(self):
@@ -92,12 +79,12 @@ class CRNN:
         outputs = Activation('softmax')(inner)
 
         model = Model(inputs, outputs)
-        plot_model(model, to_file='RNN.png', show_shapes=True)
+        #plot_model(model, to_file='RNN.png', show_shapes=True)
         return model
 
     def create_model(self):
         inputs = Input(shape=self.input_shapes, name='CRNN_input')
-        labels = Input(shape=(None,), name="label", dtype="float32")
+
         x = inputs
         for i in range(1, len(self.CNN_layer.layers)):
             x = self.CNN_layer.layers[i](x)
@@ -106,10 +93,19 @@ class CRNN:
         for j in range(1, len(self.RNN_layer.layers)):
             x = self.RNN_layer.layers[j](x)
         
-        outputs = CTCLayer(name="ctc_loss")(labels, x)
+
+        #outputs = CTCLayer(name="ctc_loss")(labels, x)
+        outputs = x
+
+        labels = Input(shape=[37], name="label", dtype="float32")
+        input_length = Input(name='input_length', shape=[1], dtype='int64')
+        label_length = Input(name='label_length', shape=[1], dtype='int64')
+        loss_out = Lambda(ctc_lambda_func, output_shape=(1,), name='ctc')([outputs, labels, input_length, label_length])
         
-        #outputs = x
-        crnn_model = Model(inputs, outputs)
+        crnn_model = Model([inputs, labels, input_length, label_length], loss_out)
+        
+        plot_model(crnn_model, to_file='CRNN.png', show_shapes=True)
+        
         return crnn_model
 
 

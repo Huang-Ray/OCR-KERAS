@@ -24,18 +24,15 @@ train_datas_shapes = np.shape(train_datas)
 
 train_labels_s = np.reshape(train_labels, (int(len(train_labels) / 4), 4))
 
-#train_hot = to_categorical(train_labels)
-#train_hot_s = np.reshape(train_hot, (int(shapes[0] / 4), 4, shapes[1]))
+train_hot = to_categorical(train_labels_s)
 
 input_shapes = np.shape(train_datas)[1:]
 
 model = CRNN(input_shapes).CRNN_model
 
-y_pred = model.outputs
+model.summary()
 
-#print(y_pred)
 
-#labels = Input(shape=(None,), name="label", dtype="float32")
 
-#output = CTCLayer(name="ctc_loss")(labels, y_pred)
+
 
