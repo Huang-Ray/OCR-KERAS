@@ -44,10 +44,11 @@ class generatorData:
 
 
 # test
+"""
 gendata = generatorData()
 train_datas, train_labels = gendata.gen_Data()
 test_datas, test_labels = gendata.gen_Data()
-
+"""
 
 
 """

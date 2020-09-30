@@ -93,25 +93,25 @@ class CRNN:
         for j in range(1, len(self.RNN_layer.layers)):
             x = self.RNN_layer.layers[j](x)
         
-
-        #outputs = CTCLayer(name="ctc_loss")(labels, x)
         outputs = x
 
-        labels = Input(shape=[37], name="label", dtype="float32")
+        labels = Input(shape=(4, 37), name="label", dtype="float32")
         input_length = Input(name='input_length', shape=[1], dtype='int64')
         label_length = Input(name='label_length', shape=[1], dtype='int64')
+
         loss_out = Lambda(ctc_lambda_func, output_shape=(1,), name='ctc')([outputs, labels, input_length, label_length])
         
         crnn_model = Model([inputs, labels, input_length, label_length], loss_out)
         
         plot_model(crnn_model, to_file='CRNN.png', show_shapes=True)
-        
+
         return crnn_model
 
 
 """ for test """
+"""
 input_shapes = (64, 128, 3)
 model = CRNN(input_shapes).CRNN_model
 model.summary()
-
+"""
 
